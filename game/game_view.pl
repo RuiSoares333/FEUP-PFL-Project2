@@ -67,19 +67,11 @@ boardLine(Board, Line, Cols) :-
 
 boardLine(Board, LineIdx, Cols, Cols) :- nl, !.
 boardLine(Board, LineIdx, Cols, Acc) :-
-    getCell(Board, Acc, LineIdx, (Color-Player)),
-    cellSymbol(Color, Player, Symbol),
-    printCell(Color, Symbol),
+    getCell(Board, Acc, LineIdx, Player),
+    cellSymbol(Player, Symbol),
+    format(' ~p |', [Symbol]),
     Acc1 is Acc + 1,
     boardLine(Board, LineIdx, Cols, Acc1).
-
-/**
- * printCell(+Color, +Symbol)
- *
- * Displays a cell of the game board
-*/
-printCell(b, Symbol) :- format('#~p#|', [Symbol]).
-printCell(w, Symbol) :- format(' ~p |', [Symbol]).
 
 /**
  * boardDelimiter(+Cols)
@@ -114,10 +106,11 @@ headerBorder(N, Acc) :-
 /**
  * cellSymbol(+Color, +Player, -Char)
  */
-cellSymbol(_, w, 'w').
-cellSymbol(_, b, 'b').
-cellSymbol(w, e, ' ').
-cellSymbol(b, e, '#').
+cellSymbol(rJ, 'R').
+cellSymbol(rS, 'r').
+cellSymbol(bJ, 'B').
+cellSymbol(bS, 'b').
+cellSymbol(e, ' ').
 
 /**
  * displayBotMove(+Move, +Player)

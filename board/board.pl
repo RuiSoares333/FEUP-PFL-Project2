@@ -1,8 +1,8 @@
 /**
  * switchColor(?Player1, ?Player2)
 */
-switchColor(w, b).
-switchColor(b, w).
+switchColor(r, b).
+switchColor(b, r).
 
 /**
  * color(+Cell, -Elem)
@@ -21,14 +21,23 @@ state(_-B, B).
 /**
  * createLine(+N, +Color, -Line)
 */
-createLine(M, Color, Line) :- createLine(M, Color, Line, []).
-createLine(0, _, Acc, Acc).
-createLine(M, Color, Line, Acc) :-
-    M > 0,
+createLine(M, Color, Line) :- createLine(M, M, Color, Line, []).
+createLine(_, 0, _, Acc, Acc).
+
+createLine(M, M, r, Line, Acc) :-
     M1 is M - 1,
-    append(Acc, [Color-e], Acc1),
-    switchColor(Color, NextColor),
-    createLine(M1, NextColor, Line, Acc1).
+    append(Acc, [rJ], Acc1),
+    createLine(M, M1, r, Line, Acc1).
+
+createLine(M, 1, b, Line, Acc) :-
+    M1 is M - 1,
+    append(Acc, [bJ], Acc1),
+    createLine(M, M1, r, Line, Acc1).
+
+createLine(M, C, Color, Line, Acc) :-
+    C1 is C - 1,
+    append(Acc, [e], Acc1),
+    createLine(M, C1, Color, Line, Acc1).
 
 /**
  * createBoard(+N, +M, -Board)
@@ -40,12 +49,12 @@ createBoard(N, M, Board) :-
     M >= 8,
     M =< 18,
     M mod 2 =:= 0, % m must be even
-    createBoard(N, M, Board, [], N, w).
+    createBoard(N, M, Board, [], N, r).
 
 createBoard(_, _, Acc, Acc, 0, _).
 createBoard(N, M, Board, Acc, Counter, Color) :-
-    Counter > 0,
     createLine(M, Color, Line),
+    write('b2'),
     append(Acc, [Line], Acc1),
     C1 is Counter - 1,
     switchColor(Color, NextColor),
