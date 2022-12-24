@@ -1,7 +1,7 @@
 /**
  * validateShiftStone(+GameState, +Pos, +NewPos)
  */
-validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
+validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos), (Board, Player)) :-
     getCell(Board, X, Y, Cell),
     state(Cell, Player), % Can only shift an owned stone
 
@@ -9,14 +9,14 @@ validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
     NewXPos is NewX, NewYPos is NewY, !.
 
 
-validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
+validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos), (NewBoard, NewPlayer)) :-
     getCell(Board, X, Y, Cell),
     state(Cell, Player), % Can only shift an owned stone
 
     checkForOtherPlayer((Board, Player), (NewX, NewY)), % check if the other cell is occupied by other player
     getCell(Board, NewX, NewY, JumperCell), % get the cell on the new position coordinates
     jumper2Skipper(JumperCell, SkipperCell), % change other player's cell to skipper
-    replaceCell(Board, NewX, NewY, SkipperCell, Board1),
+    replaceCell(Board, NewX, NewY, SkipperCell, NewBoard),
     assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)), !. 
 
 
@@ -46,8 +46,8 @@ shiftStone((Board, Player), (X, Y), (NewX, NewY), (NewBoard, NextPlayer)) :-
  * move(+GameState, +Move, -NewGameState)
  */
 move(GameState, (X, Y)-(X1, Y1), NewGameState) :-
-    validateShiftStone(GameState, (X, Y), (X1, Y1), (X2, Y2)),
-    shiftStone(GameState, (X, Y), (X2, Y2), NewGameState).
+    validateShiftStone(GameState, (X, Y), (X1, Y1), (X2, Y2), MiddleGameState),
+    shiftStone(MiddleGameState, (X, Y), (X2, Y2), NewGameState).
 
 /**
  * checkWin(+Vectors, +Player)
