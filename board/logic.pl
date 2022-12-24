@@ -1,65 +1,71 @@
 /**
- * validatePlaceStone(+GameState, +Pos)
- */
-validatePlaceStone((Board, _), (X, Y)) :-
-    getCell(Board, X, Y, Cell),
-    color(Cell, b), % Can only place a stone on black square
-    state(Cell, e). % Can only place a stone on an empty square
-
-/**
- * placeStone(+GameState, +Pos, -NewGameState)
- */
-placeStone((Board, Player), (X, Y), (NewBoard, NextPlayer)) :-
-    replaceCell(Board, X, Y, b-Player, NewBoard),
-    switchColor(Player, NextPlayer).
-
-/**
  * validateShiftStone(+GameState, +Pos, +NewPos)
  */
-validateShiftStone((Board, Player), (X, Y), (NewX, NewY)) :-
+validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
     getCell(Board, X, Y, Cell),
-    color(Cell, b), % Can only shift a stone on a black square
     state(Cell, Player), % Can only shift an owned stone
 
-    isAdjacentOrthogonally(X, Y, NewX, NewY),
+    getCell(Board, NewX, NewY, e), %check if cell is empty
+    NewXPos is NewX, NewYPos is NewY, !.
 
-    getCell(Board, NewX, NewY, NewCell),
-    color(NewCell, w), % Can only shift to a white square
-    state(NewCell, e). % Can only shift to an empty cell
+
+validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
+    getCell(Board, X, Y, Cell),
+    state(Cell, Player), % Can only shift an owned stone
+
+    checkForOtherPlayer((Board, Player), (NewX, NewY)), % check if the other cell is occupied by other player
+    getCell(Board, NewX, NewY, JumperCell), % get the cell on the new position coordinates
+    jumper2Skipper(JumperCell, SkipperCell), % change other player's cell to skipper
+    replaceCell(Board, NewX, NewY, SkipperCell, Board1),
+    assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)), !. 
+
+
+
+checkForOtherPlayer((Board, r), (X, Y)) :-
+    getCell(Board, X, Y, bJ) ; getCell(Board, X, Y, bS).    
+
+checkForOtherPlayer((Board, b), (X, Y)) :-
+    getCell(Board, X, Y, rJ) ; getCell(Board, X, Y, rS).
+
+
+assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
+    NewXPos is X + (NewX - X)*2,
+    NewYPos is Y + (NewY - Y)*2.
+
 
 /**
  * shiftStone(+GameState, +Pos, +NewPos, -NewGameState)
  */
 shiftStone((Board, Player), (X, Y), (NewX, NewY), (NewBoard, NextPlayer)) :-
-    replaceCell(Board, X, Y, b-e, Board1),
-    replaceCell(Board1, NewX, NewY, w-Player, NewBoard),
+    getCell(Board, X, Y, Cell),
+    replaceCell(Board, X, Y, e, Board1),
+    replaceCell(Board1, NewX, NewY, Cell, NewBoard),
     switchColor(Player, NextPlayer).
 
 /**
  * move(+GameState, +Move, -NewGameState)
  */
-move(GameState, Move, NewGameState) :-
-    validatePlaceStone(GameState, Move),
-    placeStone(GameState, Move, NewGameState).
-
 move(GameState, (X, Y)-(X1, Y1), NewGameState) :-
-    validateShiftStone(GameState, (X, Y), (X1, Y1)),
-    shiftStone(GameState, (X, Y), (X1, Y1), NewGameState).
+    validateShiftStone(GameState, (X, Y), (X1, Y1), (X2, Y2)),
+    shiftStone(GameState, (X, Y), (X2, Y2), NewGameState).
 
 /**
- * checkWin(+Vectors, +Player, +NumPieces)
+ * checkWin(+Vectors, +Player)
  *
  * Check if the player won, by analyzing the list of vectors
- * A vector is either a row, line or diagonal
  */
-checkWin(Vectors, Player, NumPieces) :- 
-    getWinCondition(Player, NumPieces, WinCondition),
-    checkWin(Vectors, WinCondition).
+checkWin([], _) :- true.
 
-checkWin([Vector | T], WinCondition) :-
-    sublist(Vector, WinCondition, _), ! ;
-    checkWin(T, WinCondition).
 
+checkWin([Vector | T], r) :- 
+    sublist(Vector, [rJ], _) ; sublist(Vector, [rS], _).
+
+checkWin([Vector | T], b) :- 
+    sublist(Vector, [bJ], _) ; sublist(Vector, [bS], _).
+
+checkWin([Vector | T], Player) :-
+    checkWin(T, Player).
+    
 
 /**
  * getWinCondition(+Player, +NumPieces, -WinCondition)
@@ -69,7 +75,7 @@ checkWin([Vector | T], WinCondition) :-
 getWinCondition(Player, NumPieces, WinCondition) :- getWinCondition(Player, NumPieces, WinCondition, []).
 getWinCondition(_, 0, WinCondition, WinCondition) :- !.
 getWinCondition(Player, NumPieces, WinCondition, Acc) :-
-    append(Acc, [_-Player], Acc1),
+    append(Acc, [Player], Acc1),
     NumPieces1 is NumPieces - 1,
     getWinCondition(Player, NumPieces1, WinCondition, Acc1).
 
@@ -78,24 +84,20 @@ getWinCondition(Player, NumPieces, WinCondition, Acc) :-
  */
 gameOver((Board,_), Player) :-
     validPlayer(Player),
-    transpose(Board, Cols),
-    checkWin(Cols, Player, 5). % Columns
-
-gameOver((Board,_), Player) :-
-    validPlayer(Player),
-    checkWin(Board, Player, 5).  % Rows
-
-gameOver((Board,_), Player) :-
-    validPlayer(Player),
-    whiteDiagonals(Board, WhiteDiags),
-    checkWin(WhiteDiags, Player, 4). % White Diagonals
+    \+ checkWin(Board, Player).  % Rows
 
 
 /**
  * initialState(+Size, -GameState)
  */
-initialState(SizeN, SizeM, (Board, b)) :- % Black always goes first
+initialState(SizeN, SizeM, (Board, FirstPlayer)) :- % Black always goes first
+    random(0, 2, R),
+    getFirstPlayer(R, FirstPlayer),
     createBoard(SizeN, SizeM, Board).
+
+getFirstPlayer(0, r).
+getFirstPlayer(1, b).
+
 
 validMoves(GameState, Moves):-
     findall(Move, move(GameState, Move, NewState), Moves).

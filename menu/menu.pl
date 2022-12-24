@@ -49,8 +49,8 @@ startGame(Type) :-
     menuEmptyLine,
     menuFill, nl,
 
-    readUntilBetweenAndEven(8, 18, BoardSizeN),
-    readUntilBetweenAndEven(8, 18, BoardSizeM),
+    readUntilBetweenAndEven(2, 4, BoardSizeN),
+    readUntilBetweenAndEven(2, 4, BoardSizeM),
     gameInit(BoardSizeN, BoardSizeM, Type),
     fail. % Go back to menu
 

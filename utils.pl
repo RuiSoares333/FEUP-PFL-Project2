@@ -46,10 +46,10 @@ isLetterAndBounded(Letter, N) :-
     between(65, UpperBound, Code),
     char_code(Letter, Code).
 
-isValidDirection(t).
-isValidDirection(b).
-isValidDirection(l).
-isValidDirection(r).
+isValidDirection(t, _).
+isValidDirection(b, _).
+isValidDirection(l, b).
+isValidDirection(r, r).
 
 directionToOffsets(t, 0, -1).
 directionToOffsets(b, 0, 1).

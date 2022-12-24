@@ -16,20 +16,26 @@ printPlayerTurn(Player) :-
     format('>> Your turn, ~p <<~n~n', [Player]).
 
 /**
- * readUntilValidDir(-Dir)
+ * readUntilValidDir(-Dir, Player)
  *
  * Asks the user for a direction and reads it
 */
-readUntilValidDir(Dir) :-
-    write('Choose a direction [t (top), b (bottom), l (left), r (right)]: '), 
+readUntilValidDir(Dir, r) :-
+    write('Choose a direction [t (Jump Top), b (Jump Bottom), r (Jump/Skip right)]: '), 
     get_char(Dir),
     skip_line,
-    isValidDirection(Dir), !.
+    isValidDirection(Dir, r), !.
+
+readUntilValidDir(Dir, b) :-
+    write('Choose a direction [t (Jump Top), b (Jump Bottom), l (Jump/Skip left)]: '), 
+    get_char(Dir),
+    skip_line,
+    isValidDirection(Dir, b), !.
 
 
-readUntilValidDir(Dir) :-
-    write('Invalid direction! Please choose one of the following: t, b, l, r'), nl,
-    readUntilValidDir(Dir).
+readUntilValidDir(Dir, Player) :-
+    write('Invalid move! Please choose one of the available moves.'), nl,
+    readUntilValidDir(Dir, Player).
 
 /**
  * readUntilValidRow(+RowNumber, -Row)
@@ -85,7 +91,9 @@ askTypeOfMove(Player, Num) :-
  *
  * Asks the user for a board position and reads it
 */
-askForBoardPosition(LineNumber, ColumnNumber, (X, Y)) :-
+askForBoardPosition(LineNumber, ColumnNumber, (X, Y), Player) :-
+    playerString(Player, PString),
+    printPlayerTurn(PString),
     readUntilValidCol(ColumnNumber, X),
     readUntilValidRow(LineNumber, Y).
 
@@ -94,8 +102,8 @@ askForBoardPosition(LineNumber, ColumnNumber, (X, Y)) :-
  *
  * Asks the user for a directions reads it
 */
-askForDirection((DirX, DirY)) :-
-    readUntilValidDir(Dir),
+askForDirection((DirX, DirY), Player) :-
+    readUntilValidDir(Dir, Player),
     directionToOffsets(Dir, DirX, DirY).
 
 /**
@@ -118,5 +126,5 @@ congratulateWinner(Winner) :-
     write(PString),
     write('! You won the game!'), skip_line.
 
-playerString(w, 'White').
+playerString(r, 'Red').
 playerString(b, 'Black').

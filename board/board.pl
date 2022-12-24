@@ -4,6 +4,13 @@
 switchColor(r, b).
 switchColor(b, r).
 
+
+
+jumper2Skipper(rJ, rS).
+jumper2Skipper(rS, rS).
+jumper2Skipper(bJ, bS).
+jumper2Skipper(bS, bS).
+
 /**
  * color(+Cell, -Elem)
  *
@@ -16,7 +23,10 @@ color(A-_, A).
  *
  * Gets the state of the cell (empty or either of the players)
 */
-state(_-B, B).
+state(rJ, r).
+state(rS, r).
+state(bJ, b).
+state(bS, b).
 
 /**
  * createLine(+N, +Color, -Line)
@@ -43,18 +53,11 @@ createLine(M, C, Color, Line, Acc) :-
  * createBoard(+N, +M, -Board)
 */
 createBoard(N, M, Board) :-
-    N >= 8,
-    N =< 18,
-    N mod 2 =:= 0, % N must be even
-    M >= 8,
-    M =< 18,
-    M mod 2 =:= 0, % m must be even
     createBoard(N, M, Board, [], N, r).
 
 createBoard(_, _, Acc, Acc, 0, _).
 createBoard(N, M, Board, Acc, Counter, Color) :-
     createLine(M, Color, Line),
-    write('b2'),
     append(Acc, [Line], Acc1),
     C1 is Counter - 1,
     switchColor(Color, NextColor),
@@ -190,5 +193,5 @@ lowerAndLeftCoords(ColumnNumber, RowNumber, Coords) :-
     bagof((0, Y), betweenAndEven(0, UpperY, Y), LeftColumn),
     append(LowerRow, LeftColumn, Coords).
 
-validPlayer(w).
+validPlayer(r).
 validPlayer(b).
