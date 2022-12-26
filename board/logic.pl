@@ -1,46 +1,66 @@
 /**
  * validateShiftStone(+GameState, +Pos, +NewPos)
  */
-validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos), (Board, Player)) :-
+validateShiftStone((Board, Player), (X, Y), (X, NewY), (NewXPos, NewYPos), (NewBoard, Player)) :-
+    getCell(Board, X, Y, OwnCell) ,
+    state(OwnCell, Player),
+
+    getCell(Board, X, NewY, OtherCell) ,
+    enemyState(OtherCell, Player) ,
+
+    makeJump(Board, (X, Y), (X, NewY), (NewXPos, NewYPos), NewBoard), !.
+
+validateShiftStone((Board, Player), (X, Y), (NewX, Y), (NewXPos, NewYPos), (Board, Player)) :-
+    \+ checkMoveInBound(Board, (NewX, Y)), 
+
     getCell(Board, X, Y, Cell),
     state(Cell, Player), % Can only shift an owned stone
 
-    getCell(Board, NewX, NewY, e), %check if cell is empty
-    NewXPos is NewX, NewYPos is NewY, !.
+    NewXPos is NewX, NewYPos is Y, !.
 
-
-validateShiftStone((Board, Player), (X, Y), (NewX, NewY), (NewXPos, NewYPos), (NewBoard, NewPlayer)) :-
+validateShiftStone((Board, Player), (X, Y), (NewX, Y), (NewXPos, NewYPos), (Board, Player)) :-
     getCell(Board, X, Y, Cell),
     state(Cell, Player), % Can only shift an owned stone
 
-    checkForOtherPlayer((Board, Player), (NewX, NewY)), % check if the other cell is occupied by other player
+    getCell(Board, NewX, Y, e), %check if cell is empty
+    NewXPos is NewX, NewYPos is Y, !.
+
+validateShiftStone((Board, Player), (X, Y), (NewX, Y), (NewXPos, NewYPos), (NewBoard, Player)) :-
+    getCell(Board, X, Y, Cell),
+    state(Cell, Player), % Can only shift an owned stone
+    makeJump(Board, (X, Y), (NewX, Y), (NewXPos, NewYPos), NewBoard), !.
+
+makeJump(Board, (X,Y), (NewX, NewY), (NewXPos, NewYPos), NewBoard) :-
     getCell(Board, NewX, NewY, JumperCell), % get the cell on the new position coordinates
     jumper2Skipper(JumperCell, SkipperCell), % change other player's cell to skipper
     replaceCell(Board, NewX, NewY, SkipperCell, NewBoard),
-    assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)), !. 
-
-
-
-checkForOtherPlayer((Board, r), (X, Y)) :-
-    getCell(Board, X, Y, bJ) ; getCell(Board, X, Y, bS).    
-
-checkForOtherPlayer((Board, b), (X, Y)) :-
-    getCell(Board, X, Y, rJ) ; getCell(Board, X, Y, rS).
-
+    assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)).
 
 assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
-    NewXPos is X + (NewX - X)*2,
-    NewYPos is Y + (NewY - Y)*2.
+    NewXPos is X + (NewX - X) * 2 ,
+    NewYPos is Y + (NewY - Y) * 2.
 
 
 /**
  * shiftStone(+GameState, +Pos, +NewPos, -NewGameState)
  */
 shiftStone((Board, Player), (X, Y), (NewX, NewY), (NewBoard, NextPlayer)) :-
+    checkMoveInBound(Board, (NewX, NewY)), !,
     getCell(Board, X, Y, Cell),
     replaceCell(Board, X, Y, e, Board1),
     replaceCell(Board1, NewX, NewY, Cell, NewBoard),
     switchColor(Player, NextPlayer).
+
+shiftStone((Board, Player), (X, Y), (NewX, NewY), (NewBoard, NextPlayer)) :-
+    replaceCell(Board, X, Y, e, NewBoard),
+    switchColor(Player, NextPlayer).
+
+checkMoveInBound(Board, (X, Y)) :-
+    boardDimensions(Board, LineNumber, ColumnNumber),
+    X >= 0,
+    X < ColumnNumber,
+    Y >= 0,
+    Y < LineNumber.
 
 /**
  * move(+GameState, +Move, -NewGameState)
@@ -54,14 +74,14 @@ move(GameState, (X, Y)-(X1, Y1), NewGameState) :-
  *
  * Check if the player won, by analyzing the list of vectors
  */
-checkWin([], _) :- true.
+checkWin([], _) :- false.
 
 
 checkWin([Vector | T], r) :- 
-    sublist(Vector, [rJ], _) ; sublist(Vector, [rS], _).
+    sublist(Vector, [rJ], _) ; sublist(Vector, [rS], _) , ! .
 
 checkWin([Vector | T], b) :- 
-    sublist(Vector, [bJ], _) ; sublist(Vector, [bS], _).
+    sublist(Vector, [bJ], _) ; sublist(Vector, [bS], _), !.
 
 checkWin([Vector | T], Player) :-
     checkWin(T, Player).
@@ -91,7 +111,7 @@ gameOver((Board,_), Player) :-
  * initialState(+Size, -GameState)
  */
 initialState(SizeN, SizeM, (Board, FirstPlayer)) :- % Black always goes first
-    random(0, 2, R),
+    random(0, 1, R),
     getFirstPlayer(R, FirstPlayer),
     createBoard(SizeN, SizeM, Board).
 

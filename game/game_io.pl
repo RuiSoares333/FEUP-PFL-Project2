@@ -120,7 +120,8 @@ printInvalidMove :-
  *
  * Congratulates the winner
 */
-congratulateWinner(Winner) :-
+congratulateWinner(Loser) :-
+    switchColor(Loser, Winner),
     playerString(Winner, PString),
     write('Congratulations, '),
     write(PString),

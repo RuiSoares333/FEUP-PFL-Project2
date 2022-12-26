@@ -28,6 +28,12 @@ state(rS, r).
 state(bJ, b).
 state(bS, b).
 
+
+enemyState(rJ, b).
+enemyState(rS, b).
+enemyState(bJ, r).
+enemyState(bS, r).
+
 /**
  * createLine(+N, +Color, -Line)
 */

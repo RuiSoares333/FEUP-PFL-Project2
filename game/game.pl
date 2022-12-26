@@ -9,7 +9,8 @@ gameInit(BoardSizeN, BoardSizeM, P1-P2) :-
     initialState(BoardSizeN, BoardSizeM, GameState),
     displayGame(GameState),
     random_select(FirstPlayer, [P1, P2], _Rest),
-    gameLoop(GameState, FirstPlayer, P1-P2).
+    gameLoop(GameState, FirstPlayer, P1-P2),
+    play.
 
 /**
  * gameLoop(+GameState, +PlayerType, +GameType)
@@ -17,8 +18,8 @@ gameInit(BoardSizeN, BoardSizeM, P1-P2) :-
  * Main game cycle
 */
 gameLoop(GameState, PlayerType, GameType) :-
-    gameOver(GameState, Winner), !,
-    congratulateWinner(Winner).
+    gameOver(GameState, Loser), !,
+    congratulateWinner(Loser).
 
 gameLoop(GameState, PlayerType, GameType) :-
     chooseMove(GameState, PlayerType, Move),
