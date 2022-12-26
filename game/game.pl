@@ -9,8 +9,7 @@ gameInit(BoardSizeN, BoardSizeM, P1-P2) :-
     initialState(BoardSizeN, BoardSizeM, GameState),
     displayGame(GameState),
     random_select(FirstPlayer, [P1, P2], _Rest),
-    gameLoop(GameState, FirstPlayer, P1-P2),
-    play.
+    gameLoop(GameState, FirstPlayer, P1-P2).
 
 /**
  * gameLoop(+GameState, +PlayerType, +GameType)

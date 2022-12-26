@@ -4,7 +4,6 @@
  * Displays the main menu of the game
  */
 mainMenu :-
-    repeat, % Coming back to the menu
     clear,
     menuTitle('Ski Jumps'),
     menuEmptyLine,
@@ -52,7 +51,7 @@ startGame(Type) :-
     readUntilBetweenAndEven(2, 4, BoardSizeN),
     readUntilBetweenAndEven(2, 4, BoardSizeM),
     gameInit(BoardSizeN, BoardSizeM, Type),
-    fail. % Go back to menu
+    play. % Go back to menu
 
 /**
  * difficultyMap(+Num, -Difficulty)
@@ -124,4 +123,4 @@ instructions :-
     menuFill, nl,
     write('Press Enter to go back to the Main Menu'),
     skip_line,
-    fail. % Go back to menu
+    play. % Go back to menu
