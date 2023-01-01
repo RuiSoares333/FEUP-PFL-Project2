@@ -28,6 +28,11 @@ state(rS, r).
 state(bJ, b).
 state(bS, b).
 
+emptyState(e, _).
+
+jumperState(rJ, r).
+jumperState(bJ, b).
+
 
 enemyState(rJ, b).
 enemyState(rS, b).
@@ -46,9 +51,8 @@ createLine(M, M, r, Line, Acc) :-
     createLine(M, M1, r, Line, Acc1).
 
 createLine(M, 1, b, Line, Acc) :-
-    M1 is M - 1,
     append(Acc, [bJ], Acc1),
-    createLine(M, M1, r, Line, Acc1).
+    createLine(M, 0, r, Line, Acc1).
 
 createLine(M, C, Color, Line, Acc) :-
     C1 is C - 1,

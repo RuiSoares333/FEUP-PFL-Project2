@@ -5,7 +5,7 @@
 */
 displayGame((Board, Player)) :-
     boardDimensions(Board, LineNumber, ColumnNumber),
-    clear,
+    % clear,
     displayColumns(ColumnNumber),
     displayBoard(Board, LineNumber, ColumnNumber).
 
@@ -117,15 +117,13 @@ cellSymbol(e, ' ').
  *
  * Displays information about the bot's move
 */
-displayBotMove((X, Y), Player) :-
-    playerString(Player, PString),
-    write(PString),
-    write(' chose to place a stone in the cell '),
-    Col is X + 65, put_code(Col),
-    write('-'), Row is Y + 1, write(Row),
-    skip_line, !.
+
 
 displayBotMove((X, Y)-(X1, Y1), Player) :-
+    number(X),
+    number(Y),
+    number(X1),
+    number(Y1),
     playerString(Player, PString),
     write(PString),
     write(' chose to shift a stone from the cell '),
@@ -134,4 +132,15 @@ displayBotMove((X, Y)-(X1, Y1), Player) :-
     write(' to '),
     Col1 is X1 + 65, put_code(Col1),
     write('-'), Row1 is Y1 + 1, write(Row1),
+    skip_line, !.
+
+displayBotMove((X, Y)-(_, _), Player) :-
+    number(X),
+    number(Y),
+    playerString(Player, PString),
+    write(PString),
+    write(' chose to make '),
+    Col is X + 65, put_code(Col),
+    write('-'), Row is Y + 1, write(Row),
+    write(' jump off the ski resort!'),
     skip_line, !.

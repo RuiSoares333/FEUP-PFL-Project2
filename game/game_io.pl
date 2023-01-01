@@ -74,28 +74,21 @@ readUntilValidCol(ColumnNumber, Col) :-
     format('Invalid column! Please choose one between A and ~p~n', [LastLetter]),
     readUntilValidCol(ColumnNumber, Col).
 
-
-/**
- * askTypeOfMove(+Player, -Num)
- *
- * Asks the user for the type of his move
-*/
-askTypeOfMove(Player, Num) :-
-    printPlayerTurn(Player),
-    moveOption(0, 'Place stone'), nl,
-    moveOption(1, 'Shift stone'), nl,
-    readUntilBetween(0, 1, Num).
-
 /**
  * askForBoardPosition(+LineNumber, +ColumnNumber, Pos)
  *
  * Asks the user for a board position and reads it
 */
-askForBoardPosition(LineNumber, ColumnNumber, (X, Y), Player) :-
+askForBoardPosition(LineNumber, ColumnNumber, (X, Y), (Board, Player)) :-
     playerString(Player, PString),
     printPlayerTurn(PString),
     readUntilValidCol(ColumnNumber, X),
-    readUntilValidRow(LineNumber, Y).
+    readUntilValidRow(LineNumber, Y),
+    getCell(Board, X, Y, Cell),
+    state(Cell, Player).
+
+askForBoardPosition(LineNumber, ColumnNumber, (X, Y), (Board, Player)) :- 
+    false.
 
 /**
  * askForDirection(-Direction)

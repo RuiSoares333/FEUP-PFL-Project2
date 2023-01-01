@@ -39,14 +39,20 @@ gameLoop(GameState, p, GameType) :-
 chooseMove((Board, Player), p, Move) :-
     playerString(Player, PString),
     boardDimensions(Board, LineNumber, ColumnNumber),
-    chooseTypeOfMove(LineNumber, ColumnNumber, Move, Player).
+    chooseTypeOfMove(LineNumber, ColumnNumber, Move, (Board, Player)).
 
-chooseMove(GameState, Level, Move) :-
-    validMoves(GameState, Moves),
-    chooseMove(Level, GameState, Moves, Move).
+chooseMove(Board, e, Move) :-
+    validMoves(Board, Moves),
+    chooseMove(e, GameState, Moves, Move).
+
+chooseMove(Board, h, Move) :-
+    validMoves(Board, Moves),
+    chooseMove(h, GameState, Moves, Move).
 
 chooseMove(e, (_Board, Player), Moves, Move) :-
     random_select(Move, Moves, _Rest),
+    write(Move),
+    shiftStone((Board, Player), Move, NewGameState),
     displayBotMove(Move, Player).
 
 chooseMove(h, (Board, Player), Moves, Move) :-
@@ -67,8 +73,8 @@ nextPlayer(Level2, Level1, Level1-Level2).
  *
  * Chooses the move according to the move type
 */
-chooseTypeOfMove(LineNumber, ColumnNumber, (X, Y)-(X1, Y1), Player) :-
-    askForBoardPosition(LineNumber, ColumnNumber, (X, Y), Player),
+chooseTypeOfMove(LineNumber, ColumnNumber, (X, Y)-(X1, Y1), (Board, Player)) :-
+    askForBoardPosition(LineNumber, ColumnNumber, (X, Y), (Board, Player)),
     askForDirection((XOffset, YOffset), Player),
     X1 is X + XOffset,
     Y1 is Y + YOffset.

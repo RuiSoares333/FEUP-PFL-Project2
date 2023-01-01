@@ -3,38 +3,63 @@
  */
 validateShiftStone((Board, Player), (X, Y), (X, NewY), (NewXPos, NewYPos), (NewBoard, Player)) :-
     getCell(Board, X, Y, OwnCell) ,
-    state(OwnCell, Player),
-
+    jumperState(OwnCell, Player),
     getCell(Board, X, NewY, OtherCell) ,
     enemyState(OtherCell, Player) ,
+    getCell(Board, X, NewY, e),
+    Abs is abs(NewY - Y),
+    Abs =:= 1,
 
     makeJump(Board, (X, Y), (X, NewY), (NewXPos, NewYPos), NewBoard), !.
 
 validateShiftStone((Board, Player), (X, Y), (NewX, Y), (NewXPos, NewYPos), (Board, Player)) :-
+    number(NewX),
+    number(Y),
     \+ checkMoveInBound(Board, (NewX, Y)), 
 
     getCell(Board, X, Y, Cell),
     state(Cell, Player), % Can only shift an owned stone
-
-    NewXPos is NewX, NewYPos is Y, !.
+    NewXPos is NewX,
+    NewYPos is Y.
 
 validateShiftStone((Board, Player), (X, Y), (NewX, Y), (NewXPos, NewYPos), (Board, Player)) :-
     getCell(Board, X, Y, Cell),
     state(Cell, Player), % Can only shift an owned stone
 
-    getCell(Board, NewX, Y, e), %check if cell is empty
-    NewXPos is NewX, NewYPos is Y, !.
+    getCell(Board, NewX, Y, e), % Check if cell is empty
 
-validateShiftStone((Board, Player), (X, Y), (NewX, Y), (NewXPos, NewYPos), (NewBoard, Player)) :-
-    getCell(Board, X, Y, Cell),
-    state(Cell, Player), % Can only shift an owned stone
-    makeJump(Board, (X, Y), (NewX, Y), (NewXPos, NewYPos), NewBoard), !.
+    verifyStuff(Player, NewX, X),
+    NewXPos is NewX,
+    NewYPos is Y.
+
+verifyStuff(b, NewX, X) :-
+    Val is NewX - X,
+    Val =:= -1.
+
+verifyStuff(r, NewX, X) :-
+    Val is NewX - X,
+    Val =:= 1.
+
+
+% validateShiftStone((Board, Player), (X, Y), (NewX, Y), (NewXPos, NewYPos), (NewBoard, Player)) :-
+%     write('4 '),
+%     getCell(Board, X, Y, Cell),
+%     state(Cell, Player), % Can only shift an owned stone
+%     makeJump(Board, (X, Y), (NewX, Y), (NewXPos, NewYPos), NewBoard), !.
 
 makeJump(Board, (X,Y), (NewX, NewY), (NewXPos, NewYPos), NewBoard) :-
+    XPos is X + (NewX - X) * 2 ,
+    YPos is Y + (NewY - Y) * 2,
+    checkMoveInBound(Board, (XPos, YPos)),
     getCell(Board, NewX, NewY, JumperCell), % get the cell on the new position coordinates
     jumper2Skipper(JumperCell, SkipperCell), % change other player's cell to skipper
     replaceCell(Board, NewX, NewY, SkipperCell, NewBoard),
     assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)).
+
+makeJump(Board, (X,Y), (NewX, NewY), (NewXPos, NewYPos), NewBoard) :-
+    getCell(Board, NewX, NewY, JumperCell), % get the cell on the new position coordinates
+    jumper2Skipper(JumperCell, SkipperCell), % change other player's cell to skipper
+    replaceCell(Board, NewX, NewY, SkipperCell, NewBoard).
 
 assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
     NewXPos is X + (NewX - X) * 2 ,
@@ -44,14 +69,24 @@ assignNewPosition((X, Y), (NewX, NewY), (NewXPos, NewYPos)) :-
 /**
  * shiftStone(+GameState, +Pos, +NewPos, -NewGameState)
  */
-shiftStone((Board, Player), (X, Y), (NewX, NewY), (NewBoard, NextPlayer)) :-
-    checkMoveInBound(Board, (NewX, NewY)), !,
+
+ shiftStone((Board, Player), (X, Y)-(X, NewY), (NewBoard, NextPlayer)) :-
+    number(X),
+    number(NewY),
+    checkMoveInBound(Board, (NewX, NewY)),
+    makeJump(Board, (X, Y), (X, NewY), (NewXPos, NewYPos), NewBoard)
+    switchColor(Player, NextPlayer).
+
+shiftStone((Board, Player), (X, Y)-(NewX, NewY), (NewBoard, NextPlayer)) :-
+    number(NewX),
+    number(NewY),
+    checkMoveInBound(Board, (NewX, NewY)),
     getCell(Board, X, Y, Cell),
     replaceCell(Board, X, Y, e, Board1),
     replaceCell(Board1, NewX, NewY, Cell, NewBoard),
     switchColor(Player, NextPlayer).
 
-shiftStone((Board, Player), (X, Y), (NewX, NewY), (NewBoard, NextPlayer)) :-
+shiftStone((Board, Player), (X, Y)-(NewX, NewY), (NewBoard, NextPlayer)) :-
     replaceCell(Board, X, Y, e, NewBoard),
     switchColor(Player, NextPlayer).
 
@@ -65,9 +100,19 @@ checkMoveInBound(Board, (X, Y)) :-
 /**
  * move(+GameState, +Move, -NewGameState)
  */
+
+% move(GameState, Move) :-
+    
+
 move(GameState, (X, Y)-(X1, Y1), NewGameState) :-
     validateShiftStone(GameState, (X, Y), (X1, Y1), (X2, Y2), MiddleGameState),
-    shiftStone(MiddleGameState, (X, Y), (X2, Y2), NewGameState).
+    shiftStone(MiddleGameState, (X, Y)-(X2, Y2), NewGameState).
+
+
+validMoves(GameState, Moves):-
+    findall(Move, move(GameState, Move, NewState), Moves),
+    write(Moves),
+    write('\n').
 
 /**
  * checkWin(+Vectors, +Player)
@@ -111,17 +156,12 @@ gameOver((Board,_), Player) :-
  * initialState(+Size, -GameState)
  */
 initialState(SizeN, SizeM, (Board, FirstPlayer)) :- % Black always goes first
-    random(0, 1, R),
+    random(0, 2, R),
     getFirstPlayer(R, FirstPlayer),
     createBoard(SizeN, SizeM, Board).
 
 getFirstPlayer(0, r).
 getFirstPlayer(1, b).
-
-
-validMoves(GameState, Moves):-
-    findall(Move, move(GameState, Move, NewState), Moves).
-
 
 /**
  * evaluateVector(+Vector, +Player, +WinNum, -Value)
