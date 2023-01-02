@@ -96,9 +96,9 @@ displayInstructions :-
 
     menuText('************************ Gameplay ************************'),
     menuEmptyLine,
-    menuText('White/Black jumpers move any number of cells to the right/left.'),
+    menuText('Red/Black jumpers move any number of cells to the right/left.'),
 	menuText('They can also jump over an enemy piece directly below/above them.'),
-    menuText('If that jumped piece is a Jumper, it is demoted to a slipper.'),
+    menuText('If that jumped piece is a Jumper, it is demoted to a Slipper.'),
     menuText('When a piece moves off the board, it is removed'),
 
     menuEmptyLine,

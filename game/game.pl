@@ -22,10 +22,11 @@ gameLoop(GameState, PlayerType, GameType) :-
 
 gameLoop(GameState, PlayerType, GameType) :-
     chooseMove(GameState, PlayerType, Move),
-    move(GameState, Move, NewGameState),
+    move(GameState, Move, (NewBoard, Player)),
     nextPlayer(PlayerType, NewPlayerType, GameType),
-    displayGame(NewGameState),
-    gameLoop(NewGameState, NewPlayerType, GameType), !.
+    switchColor(Player, NewPlayer),
+    displayGame((NewBoard, NewPlayer)),
+    gameLoop((NewBoard, NewPlayer), NewPlayerType, GameType), !.
 
 gameLoop(GameState, p, GameType) :-
     printInvalidMove,
@@ -41,18 +42,16 @@ chooseMove((Board, Player), p, Move) :-
     boardDimensions(Board, LineNumber, ColumnNumber),
     chooseTypeOfMove(LineNumber, ColumnNumber, Move, (Board, Player)).
 
-chooseMove(Board, e, Move) :-
-    validMoves(Board, Moves),
+chooseMove(GameState, e, Move) :-
+    validMoves(GameState, Moves),
     chooseMove(e, GameState, Moves, Move).
 
-chooseMove(Board, h, Move) :-
-    validMoves(Board, Moves),
+chooseMove(GameState, h, Move) :-
+    validMoves(GameState, Moves),
     chooseMove(h, GameState, Moves, Move).
 
 chooseMove(e, (_Board, Player), Moves, Move) :-
     random_select(Move, Moves, _Rest),
-    write(Move),
-    shiftStone((Board, Player), Move, NewGameState),
     displayBotMove(Move, Player).
 
 chooseMove(h, (Board, Player), Moves, Move) :-

@@ -5,7 +5,7 @@
 */
 displayGame((Board, Player)) :-
     boardDimensions(Board, LineNumber, ColumnNumber),
-    % clear,
+    clear,
     displayColumns(ColumnNumber),
     displayBoard(Board, LineNumber, ColumnNumber).
 
