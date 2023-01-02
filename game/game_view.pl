@@ -118,6 +118,16 @@ cellSymbol(e, ' ').
  * Displays information about the bot's move
 */
 
+displayBotMove((X, Y)-(X, Y), Player) :-
+    number(X),
+    number(Y),
+    playerString(Player, PString),
+    write(PString),
+    write(' chose to make '),
+    Col is X + 65, put_code(Col),
+    write('-'), Row is Y + 1, write(Row),
+    write(' jump off the ski resort!'),
+    skip_line, !.
 
 displayBotMove((X, Y)-(X1, Y1), Player) :-
     number(X),
@@ -132,15 +142,4 @@ displayBotMove((X, Y)-(X1, Y1), Player) :-
     write(' to '),
     Col1 is X1 + 65, put_code(Col1),
     write('-'), Row1 is Y1 + 1, write(Row1),
-    skip_line, !.
-
-displayBotMove((X, Y)-(_, _), Player) :-
-    number(X),
-    number(Y),
-    playerString(Player, PString),
-    write(PString),
-    write(' chose to make '),
-    Col is X + 65, put_code(Col),
-    write('-'), Row is Y + 1, write(Row),
-    write(' jump off the ski resort!'),
     skip_line, !.
