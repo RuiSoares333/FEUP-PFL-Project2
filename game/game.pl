@@ -56,10 +56,35 @@ chooseMove(e, (_Board, Player), Moves, Move) :-
 
 chooseMove(h, (Board, Player), Moves, Move) :-
     setof(Value-Mv, (NewBoard, Opponent)^( member(Mv, Moves),
-        move((Board, Player), Mv, (NewBoard, Opponent)),
-        switchColor(Opponent, Player),
-        evaluateBoard((NewBoard, Player), Value) ), [_V-Move|_]),
+        move((Board, Player), Mv, (NewBoard, Player)),
+        evaluateBoard((NewBoard, Player), Value) ), AllMoves),
+    getFirstElement(AllMoves, Value-Mv),
+    filter(Value, AllMoves, BestMoves),
+    write('Best Moves = '),
+    write(BestMoves),
+    write('\n'),
+    random_select(Value-Move, Moves, _Rest),
+    write('Move = '),
+    write(Move),
+    write('\n'),
     displayBotMove(Move, Player).
+
+/**
+ * filter(+Value, +AllMoves, -BestMoves)
+ *
+ * Filters the list by the V-M element that has V equal to the given Value
+*/
+
+filter(_, [], BestMoves).
+
+filter(Value, [Value1-Mv | T], BestMoves) :-
+    (Value =:= Value1 -> append(BestMoves, [Value1-Mv], BestMoves1) ; append(BestMoves, [], BestMoves1)),
+    write('Best Moves inside filter = '),
+    write(BestMoves1),
+    write('\n'),
+    filter(Value, T, BestMoves1).
+
+getFirstElement([Value-Mv | T], Value-Mv).
 
 nextPlayer(p, p, p-p).
 nextPlayer(p, Level, p-Level).

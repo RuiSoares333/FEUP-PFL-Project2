@@ -62,20 +62,9 @@ directionToOffsets(r, 1, 0).
  * Counts the ocurrences of an element in a list
  */
 countOcurrences(List, Elem, Res) :- countOcurrences(List, Elem, Res, 0).
-countOcurrences([], _, Res, Res) :- !.
+countOcurrences([], _, Res, _) :- !.
 countOcurrences([Elem | T], Elem, Res, Acc) :-
     Acc1 is Acc + 1,
+    Res is Acc1,
     countOcurrences(T, Elem, Res, Acc1).
 countOcurrences([_ | T], Elem, Res, Acc) :- countOcurrences(T, Elem, Res, Acc).
-
-/**
- * mapsublist(Pred, List, Result)
- *
- * Applies map to the sublists of a matrix
- */
-mapsublist(Pred, List, Result) :- mapsublist(Pred, List, Result, []).
-mapsublist(_, [], Result, Result).
-mapsublist(Pred, [Sub | T], Result, Acc) :-
-    maplist(Pred, Sub, NewSub),
-    append(Acc, [NewSub], Acc1),
-    mapsublist(Pred, T, Result, Acc1).

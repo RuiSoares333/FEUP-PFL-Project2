@@ -89,20 +89,22 @@ displayInstructions :-
     menuText('************************ Game Board ************************'),
     menuEmptyLine,
     menuText('This game is played on a NxM rectangular'),
-    menuText('board with a number of white and black stones'),
+    menuText('board with a number of red and black pieces'),
     menuText('facing each other on each board edge'),
 
     menuEmptyLine,
 
     menuText('************************ Gameplay ************************'),
     menuEmptyLine,
-    menuText('Red/Black jumpers move any number of cells to the right/left.'),
-	menuText('They can also jump over an enemy piece directly below/above them.'),
+    menuText('Red/Black jumpers move 1 cells to the right/left each time.'),
+	menuText('They can also jump over an enemy piece directly below or above them.'),
     menuText('If that jumped piece is a Jumper, it is demoted to a Slipper.'),
+    menuText('But be careful! You can also jump off of the board!'),
     menuText('When a piece moves off the board, it is removed'),
 
     menuEmptyLine,
 
     menuText('************************ How to Win ************************'),
     menuEmptyLine,
-    menuText('Wins the player that made the last move.').
+    menuText('Wins the player that made the last move.'),
+    menuText('(Wins the player that has the last remaining piece)').

@@ -1,5 +1,7 @@
 /**
  * validateShiftStone(+GameState, +Pos, +NewPos)
+ *
+ * Verifies if the movement from Pos to NewPos is possible
  */
 validateShiftStone((Board, Player), (X, Y), (X, NewY)) :-
     getCell(Board, X, Y, OwnCell) ,
@@ -21,20 +23,27 @@ validateShiftStone((Board, Player), (X, Y), (NewX, Y)) :-
     (getCell(Board, NewX, Y, e) ; \+ checkInBound(Board, (NewX, Y))),
     verifyShift(Player, X, NewX).
 
+/**
+ * verifyShit(+Player, +X, +NewX)
+ *
+ * Verifies if the move is being made in the correct direction
+*/
 
 verifyShift(b, X, NewX) :-
     number(NewX),
     Val is NewX - X,
-    Val =:= -1.
+    Val =:= -1. % Black moves left so value has to be negative
 
 verifyShift(r, X, NewX) :-
     number(NewX),
     Val is NewX - X,
-    Val =:= 1.
+    Val =:= 1. % Red moves right so value has to be positive
 
 
 /**
  * shiftStone(+GameState, +Pos, +NewPos, -NewGameState)
+ *
+ * Moves the piece in Pos to NewPos
  */
 shiftStone((Board, Player), (X, Y), (X, NewY), (NewBoard, Player)) :-
     YPos is Y + (NewY - Y) * 2,
@@ -68,8 +77,13 @@ shiftStone((Board, Player), (X, Y), (NewX, Y), (NewBoard, Player)) :-
 
 
 shiftStone((Board, Player), (X, Y), (NewX, Y), (NewBoard, Player)) :-
-    replaceCell(Board, X, Y, e, NewBoard).
+    replaceCell(Board, X, Y, e, NewBoard). % Last case, if all others fail it means that the piece left the board
 
+/**
+ * checkInBound(+Board, +Pos)
+ *
+ * Checks if Pos is inside the Board
+ */
 
 checkInBound(Board, (X, Y)) :-
     boardDimensions(Board, LineNumber, ColumnNumber),
@@ -80,51 +94,57 @@ checkInBound(Board, (X, Y)) :-
     Y < LineNumber.
 
 /**
- * move(+GameState, +Move, -NewGameState)
+ * findMoves(+GameState, +Move, -NewGameState)
+ *
+ * Used by validMoves to find the possible moves for a given GameState
  */
-
-% move(GameState, Move) :-
 
 findMoves(GameState, (X, Y)-(X1, Y1), NewGameState) :-
     validateShiftStone(GameState, (X, Y), (X1, Y1)),
     shiftStone(GameState, (X, Y), (X1, Y1), NewGameState).
 
+/**
+ * move(+GameState, +Move, -NewGameState)
+ *
+ * Executes a move
+ */
+
 move(GameState, (X, Y)-(X1, Y1), NewGameState) :-
     validateShiftStone(GameState, (X, Y), (X1, Y1)),
     shiftStone(GameState, (X, Y), (X1, Y1), NewGameState).
 
-move((Board, Player), (X, Y)-(X, Y), (NewBoard, Player)) :-
+move((Board, Player), (X, Y)-(X, Y), (NewBoard, Player)) :- % If the movement is staying in the same position it means that it left the board
     getCell(Board, X, Y, Cell),
     state(Cell, Player),
     replaceCell(Board, X, Y, e, NewBoard).
 
+/**
+ * validMoves(+GameState, -Moves)
+ *
+ * Generates all the possible Moves for a given GameState
+*/
 
 validMoves((Board, Player), Moves):-
     setof(Move, NewState^(findMoves((Board, Player), Move, NewState)), Moves).
 
-
 validMoves((Board, r), Moves) :-
     boardDimensions(Board, LineNumber, ColumnNumber),
-    Sussy is ColumnNumber - 1,
-    findall((Sussy, Y), getCell(Board, Sussy, Y, rJ), Cells),
+    C is ColumnNumber - 1,
+    findall((C, Y), getCell(Board, C, Y, rJ), Cells),
     random_select((X1, Y1), Cells, _Rest),
     append([], [(X1, Y1)-(X1, Y1)], Moves).
 
-
-
 validMoves((Board, r), Moves) :-
     boardDimensions(Board, LineNumber, ColumnNumber),
-    Sussy is ColumnNumber - 1,
-    findall((Sussy, Y), getCell(Board, Sussy, Y, rS), Cells),
+    C is ColumnNumber - 1,
+    findall((C, Y), getCell(Board, C, Y, rS), Cells),
     random_select((X1, Y1), Cells, _Rest),
     append([], [(X1, Y1)-(X1, Y1)], Moves).
-
 
 validMoves((Board, b), Moves) :-
     findall((0, Y), getCell(Board, 0, Y, bJ), Cells),
     random_select((X1, Y1), Cells, _Rest),
     append([], [(X1, Y1)-(X1, Y1)], Moves).
-
 
 validMoves((Board, b), Moves) :-
     findall((0, Y), getCell(Board, 0, Y, bS), Cells),
@@ -138,7 +158,6 @@ validMoves((Board, b), Moves) :-
  */
 checkWin([], _) :- false.
 
-
 checkWin([Vector | T], r) :- 
     sublist(Vector, [rJ], _) ; sublist(Vector, [rS], _) , ! .
 
@@ -148,7 +167,6 @@ checkWin([Vector | T], b) :-
 checkWin([Vector | T], Player) :-
     checkWin(T, Player).
     
-
 /**
  * getWinCondition(+Player, +NumPieces, -WinCondition)
  *
@@ -168,7 +186,6 @@ gameOver((Board,_), Player) :-
     validPlayer(Player),
     \+ checkWin(Board, Player).  % Rows
 
-
 /**
  * initialState(+Size, -GameState)
  */
@@ -181,87 +198,56 @@ getFirstPlayer(0, r).
 getFirstPlayer(1, b).
 
 /**
- * evaluateVector(+Vector, +Player, +WinNum, -Value)
+ * countPieces(+Board, +Cell, -Num)
  *
- * Evaluates a vector by counting how many pieces you need to place in order to win in that vector.
- * If the opponent is blocking, Value is WinNum + minimum number of pieces the opponent needs to take out
+ * Counts the number of pieces of type Cell
  */
-evaluateVector(Vector, Player, WinNum, Value) :-
-    evaluateVectorSimmetric(Vector, Player, WinNum, Max),
-    Value is WinNum - Max.
 
-/**
- * evaluateVectorSimmetric(+Vector, +Player, +WinNum, -Max)
- *
- * Simetric of the evaluateVector function, to ease calculations
- */
-evaluateVectorSimmetric(Vector, Player, WinNum, Max) :-
-    Min is 0 - WinNum,
-    evaluateVectorSimmetric(Vector, Player, WinNum, Max, 0, Min).
-evaluateVectorSimmetric(Vector, _, WinNum, Max, Before, Max) :-
-    length(Vector, Len),
-    Len is Before + WinNum - 1.
-
-evaluateVectorSimmetric(Vector, Player, WinNum, Max, Before, CurMax) :-
-    sublist(Vector, SubVector, Before, WinNum),
-    countFreePieces(SubVector, Player, Num),
-    max_member(NewMax, [CurMax, Num]),
-    Before1 is Before + 1,
-    evaluateVectorSimmetric(Vector, Player, WinNum, Max, Before1, NewMax).
-
-/**
- * countFreePieces(+List, +Player, -Num)
- *
- * Counts the number of player owned pieces not interrupted by the opponent
- * If the opponent has pieces in the list, Num is the simmetric of the opponent's number of pieces
- */
-countFreePieces(List, Player, Num) :-
-    switchColor(Player, Opponent),
-    member(Opponent, List),
-    countOcurrences(List, Opponent, OpponentOcurrences),
-    Num is 0 - OpponentOcurrences, !.
-
-countFreePieces(List, Player, Num) :-
-    countOcurrences(List, Player, Num), !.
+countPieces(Board, Cell, Num) :-
+    findall(_, getCell(Board, _, _, Cell), Cells),
+    length(Cells, Num).
 
 /**
  * evaluateBoard(+State, -Value)
  *
  * The board is better with a smaller Value (0 is a win)
  */
-evaluateBoard((Board, Player), Value) :-
-    transpose(Board, Cols),
-    % These 2 are separated because the win condition is different
-    whiteDiagonals(Board, WhiteDiagsOptions),
-    append(Board, Cols, LinearOptions),
 
-    mapsublist(state, LinearOptions, Linear),
-    mapsublist(state, WhiteDiagsOptions, WhiteDiags),
+evaluateBoard((Board, r), Value) :-
 
-    % Player Side
-    setof(Val, Vector^( member(Vector, Linear), evaluateVector(Vector, Player, 5, Val) ), [ValueLinear|_]),
-    setof(Val, Vector^( member(Vector, WhiteDiags), evaluateVector(Vector, Player, 4, Val) ), [ValueDiag|_]),
-    min_member(PlayerValue, [ValueDiag, ValueLinear]),
+    countPieces(Board, rJ, Num1),
+    countPieces(Board, rS, Num2),
+    PlayerValue is Num1+Num2*2, % weight of the player having a skipper is higher for the player
 
-    % Opponent Side
-    switchColor(Player, Opponent),
-    setof(Val, Vector^( member(Vector, Linear), evaluateVector(Vector, Opponent, 5, Val) ), OppLinearList),
-    setof(Val, Vector^( member(Vector, WhiteDiags), evaluateVector(Vector, Opponent, 4, Val) ), OppDiagList),
-    append(OppLinearList, OppDiagList, OpponentList),
-    min_member(OpponentValue, OpponentList),
+    countPieces(Board, bJ, Num3),
+    countPieces(Board, bS, Num4),
+    OpponentValue is Num3*2+Num4, % weight of the opponent having a jumper is higher for the player
+
+    overallValue(PlayerValue, OpponentValue, Value).
+
+evaluateBoard((Board, b), Value) :-
+
+    countPieces(Board, bJ, Num1),
+    countPieces(Board, bS, Num2),
+    PlayerValue is Num1+Num2*2, % weight of the player having a skipper is higher for the player
+
+    countPieces(Board, rJ, Num3),
+    countPieces(Board, rS, Num4),
+    OpponentValue is Num3*2+Num4, % weight of the opponent having a jumper is higher for the player
 
     overallValue(PlayerValue, OpponentValue, Value).
 
 /**
  * overallValue(+PlayerValue, +OpponentValue, -Value)
  *
- * Calculates a value based on the player and opponent's base values
+ * Calculates a value based on the player and opponent's values
 */
-overallValue(0, _, 0). % win
-overallValue(PlayerValue, OpponentValue, Value) :-
-    PlayerValue >= OpponentValue, % bad position, block opponent instead
-    Value is 20 - OpponentValue.
+overallValue(_, 0, 0). % win
 
 overallValue(PlayerValue, OpponentValue, Value) :-
-    PlayerValue < OpponentValue, % good position, play for yourself
-    Value is 5 + PlayerValue - OpponentValue. % It's still better to block opponent if possible
+    PlayerValue > OpponentValue,
+    Value is PlayerValue.
+
+overallValue(PlayerValue, OpponentValue, Value) :-
+    PlayerValue =< OpponentValue,
+    Value is OpponentValue.
