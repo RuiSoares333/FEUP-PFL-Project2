@@ -127,26 +127,26 @@ move((Board, Player), (X, Y)-(X, Y), (NewBoard, Player)) :- % If the movement is
 validMoves((Board, Player), Moves):-
     setof(Move, NewState^(findMoves((Board, Player), Move, NewState)), Moves).
 
-validMoves((Board, r), Moves) :-
+validMoves((Board, r), Moves) :- % Checks if red Jumpers are leaving the board
     boardDimensions(Board, LineNumber, ColumnNumber),
     C is ColumnNumber - 1,
     findall((C, Y), getCell(Board, C, Y, rJ), Cells),
     random_select((X1, Y1), Cells, _Rest),
     append([], [(X1, Y1)-(X1, Y1)], Moves).
 
-validMoves((Board, r), Moves) :-
+validMoves((Board, r), Moves) :- % Checks if red Slippers are leaving the board
     boardDimensions(Board, LineNumber, ColumnNumber),
     C is ColumnNumber - 1,
     findall((C, Y), getCell(Board, C, Y, rS), Cells),
     random_select((X1, Y1), Cells, _Rest),
     append([], [(X1, Y1)-(X1, Y1)], Moves).
 
-validMoves((Board, b), Moves) :-
-    findall((0, Y), getCell(Board, 0, Y, bJ), Cells),
+validMoves((Board, b), Moves) :- % Checks if black Jumpers are leaving the board
+    findall((0, Y), getCell(Board, 0, Y, bJ), Cells), 
     random_select((X1, Y1), Cells, _Rest),
     append([], [(X1, Y1)-(X1, Y1)], Moves).
 
-validMoves((Board, b), Moves) :-
+validMoves((Board, b), Moves) :-% Checks if black Slippers are leaving the board
     findall((0, Y), getCell(Board, 0, Y, bS), Cells),
     random_select((X1, Y1), Cells, _Rest),
     append([], [(X1, Y1)-(X1, Y1)], Moves).

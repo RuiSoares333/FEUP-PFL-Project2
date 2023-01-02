@@ -37,16 +37,16 @@ gameLoop(GameState, p, GameType) :-
  *
  * Chooses the move according to the game state and player type
 */
-chooseMove((Board, Player), p, Move) :-
+chooseMove((Board, Player), p, Move) :- % Call for the player
     playerString(Player, PString),
     boardDimensions(Board, LineNumber, ColumnNumber),
     chooseTypeOfMove(LineNumber, ColumnNumber, Move, (Board, Player)).
 
-chooseMove(GameState, e, Move) :-
+chooseMove(GameState, e, Move) :- % Call for the easy bot
     validMoves(GameState, Moves),
     chooseMove(e, GameState, Moves, Move).
 
-chooseMove(GameState, h, Move) :-
+chooseMove(GameState, h, Move) :- % Call for the hard bot
     validMoves(GameState, Moves),
     chooseMove(h, GameState, Moves, Move).
 
@@ -59,15 +59,8 @@ chooseMove(h, (Board, Player), Moves, Move) :-
         move((Board, Player), Mv, (NewBoard, Player)),
         evaluateBoard((NewBoard, Player), Value) ), AllMoves),
     getFirstElement(AllMoves, Value-Mv),
-    write(Value),
     setof(BVal-Move, (member(BVal-Move, AllMoves), BVal=:=Value), BestMoves),
-    write('Best Moves = '),
-    write(BestMoves),
-    write('\n'),
     random_select(Value-Move, BestMoves, _Rest),
-    write('Move = '),
-    write(Move),
-    write('\n'),
     displayBotMove(Move, Player).
 
 
