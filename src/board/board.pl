@@ -5,7 +5,6 @@ switchColor(r, b).
 switchColor(b, r).
 
 
-
 jumper2Skipper(rJ, rS).
 jumper2Skipper(rS, rS).
 jumper2Skipper(bJ, bS).

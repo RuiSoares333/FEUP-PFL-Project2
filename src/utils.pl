@@ -56,6 +56,8 @@ directionToOffsets(b, 0, 1).
 directionToOffsets(l, -1, 0).
 directionToOffsets(r, 1, 0).
 
+getFirstElement([Value-Mv | T], Value-Mv).
+
 /**
  * countOcurrences(List, Elem, Res)
  *

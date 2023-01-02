@@ -64,8 +64,6 @@ chooseMove(h, (Board, Player), Moves, Move) :-
     displayBotMove(Move, Player).
 
 
-getFirstElement([Value-Mv | T], Value-Mv).
-
 nextPlayer(p, p, p-p).
 nextPlayer(p, Level, p-Level).
 nextPlayer(Level, p, p-Level).
